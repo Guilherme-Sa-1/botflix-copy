@@ -71,7 +71,7 @@ async function handleSearch() {
 
     try {
         // Fazer POST para o webhook do N8N
-        const response = await fetch('https://guilhermecgsa8.app.n8n.cloud/webhook/8c37930f-9dfd-4120-b448-c773aeefa36f', {
+        const response = await fetch('https://guilhermecgsa8.app.n8n.cloud/webhook-test/8c37930f-9dfd-4120-b448-c773aeefa36f', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
