@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Botflix - Para encontrar o Filme Ideal!</title>
+</head>
+
+<body>
+    <main class="container">
+        <div class="main-content">
+            <header class="brand-header">
+                <img src="src/images/botflix-robot.jpg" alt="Robo Botflix class=" src">
+
+                <h1>Botflix</h1>
+            </header>
+            <section class="search-card">
+                <div class="search-content">
+                    <div class="input-container">
+                        <textarea rows="3" id="mood-textarea"
+                            placeholder="Digite como você está sentindo agora ou o que deseja assistir hoje!"></textarea>
+                        <div class="examples">
+                            <p class="examples-title">Exemplos</p>
+                            <ul class="example-list">
+                                <li>Quero assistir algo romantico</li>
+                                <li>Um filme mais agua com açucar para relaxar</li>
+                                <li>Algo sério e com ação</li>
+                            </ul>
+                        </div>
+                        <button id="search-button" class="search-button"><span class="play-icon">&#9654</span> Encontrar filme perfeito!</button>
+                    </div>
+                </div>
+            </section>
+
+            <div id="results">
+                <h2>Filmes perfeitos para você</h2>
+                <div id="movie" class="movie"></div>
+            </div>
+        </div>
+
+    </main>
+</body>
+
+</html>
