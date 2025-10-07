@@ -71,7 +71,7 @@ async function handleSearch() {
 
     try {
         // Fazer POST para o webhook do N8N
-        const response = await fetch('https://botflix3.app.n8n.cloud/webhook/f6e7d294-5206-450e-beae-8eedb34498f9', {
+        const response = await fetch('https://guilhermecgsa8.app.n8n.cloud/webhook/8c37930f-9dfd-4120-b448-c773aeefa36f', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -82,7 +82,7 @@ async function handleSearch() {
         const data = await response.json();
 
         // Limpa a área de resultados antes de adicionar os novos
-        moviesGrid.innerHTML = ''; 
+        moviesGrid.innerHTML = '';
 
         // 2. Exibir os resultados ou a mensagem de "nenhum encontrado"
         if (data && Array.isArray(data.results) && data.results.length > 0) {
@@ -138,7 +138,7 @@ function addTypingEffect() {
 
     function type() {
         const currentPlaceholder = placeholders[currentIndex];
-        
+
         if (moodInput.value) return; // Pausa se o usuário estiver digitando
 
         if (isDeleting) {
@@ -160,6 +160,6 @@ function addTypingEffect() {
             setTimeout(type, isDeleting ? erasingSpeed : typingSpeed);
         }
     }
-    
+
     setTimeout(type, 500);
 }
