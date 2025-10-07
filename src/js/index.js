@@ -1,22 +1,22 @@
 // DOM Elements
 const moodInput = document.getElementById('mood-input');
 const searchButton = document.getElementById('search-button');
-// ...código removido do microfone...
+const resultsDiv = document.getElementById('results');
+const moviesGrid = document.getElementById('movies-grid');
 
 // Initialize app
 document.addEventListener('DOMContentLoaded', function () {
     setupEventListeners();
     updateSearchButton();
+    addTypingEffect(); // Ativando o efeito de digitação
 });
 
 // Event Listeners
 function setupEventListeners() {
-    // Input change listener
-    moodInput.addEventListener('input', function () {
-        updateSearchButton();
-    });
+    // Listener para o campo de texto
+    moodInput.addEventListener('input', updateSearchButton);
 
-    // Enter key listener
+    // Listener para a tecla Enter
     moodInput.addEventListener('keypress', function (e) {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
@@ -26,31 +26,46 @@ function setupEventListeners() {
         }
     });
 
-    // Search button listener
+    // Listener para o botão de busca
     searchButton.addEventListener('click', handleSearch);
 
-    // ...código removido do microfone...
+    // Listener para os exemplos clicáveis
+    document.querySelectorAll('.example-tag').forEach(tag => {
+        tag.addEventListener('click', () => {
+            moodInput.value = tag.textContent.trim();
+            updateSearchButton();
+            moodInput.focus();
+        });
+    });
 }
 
-// Update search button state
+// Habilita/desabilita o botão de busca
 function updateSearchButton() {
     const hasText = moodInput.value.trim().length > 0;
     searchButton.disabled = !hasText;
 }
 
-// Handle search functionality
+// Lida com a busca dos filmes
 async function handleSearch() {
     const mood = moodInput.value.trim();
 
     if (!mood) {
-        alert('Por favor, descreva o que você quer assistir!');
+        // Embora o botão esteja desabilitado, é uma boa prática manter a verificação
         return;
     }
 
-    // Show loading state
-    const originalText = searchButton.innerHTML;
-    searchButton.innerHTML = '<span style="animation: pulse 1s infinite;">🔍 Buscando...</span>';
+    // 1. Mostrar estado de carregamento
+    const originalButtonText = searchButton.innerHTML;
+    searchButton.innerHTML = '<span style="animation: pulse 1.5s infinite;">🔍 Buscando...</span>';
     searchButton.disabled = true;
+    resultsDiv.style.display = 'block';
+    moviesGrid.innerHTML = `
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+    `;
+    resultsDiv.scrollIntoView({ behavior: 'smooth' });
+
 
     const prompt = JSON.stringify({ userPrompt: mood });
 
@@ -66,25 +81,20 @@ async function handleSearch() {
 
         const data = await response.json();
 
+        // Limpa a área de resultados antes de adicionar os novos
+        moviesGrid.innerHTML = ''; 
 
-        // Novo formato: data.results (TMDB padrão)
+        // 2. Exibir os resultados ou a mensagem de "nenhum encontrado"
         if (data && Array.isArray(data.results) && data.results.length > 0) {
-            const movie = data.results[0];
+            data.results.forEach(movie => {
+                const posterUrl = movie.poster_path
+                    ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
+                    : '';
 
-            let posterUrl = movie.poster_path || '';
-            if (posterUrl && !/^https?:\/\//.test(posterUrl)) {
-                posterUrl = `https://image.tmdb.org/t/p/w500${posterUrl}`;
-            }
-
-            // Exibe o resultado
-            const resultsDiv = document.getElementById('results');
-            const moviesGrid = document.getElementById('movies-grid');
-            if (resultsDiv && moviesGrid) {
-                resultsDiv.style.display = 'block';
-                moviesGrid.innerHTML = `
+                const movieCardHTML = `
                     <div class="movie-card">
                         <div class="movie-poster">
-                            ${posterUrl ? `<img src="${posterUrl}" alt="${movie.title}">` : '<div class="no-poster">Sem imagem</div>'}
+                            ${posterUrl ? `<img src="${posterUrl}" alt="Pôster de ${movie.title}">` : '<div class="no-poster">Pôster não disponível</div>'}
                         </div>
                         <div class="movie-info">
                             <h4 class="movie-title">${movie.title}</h4>
@@ -93,40 +103,63 @@ async function handleSearch() {
                         </div>
                     </div>
                 `;
-            } else {
-                alert('Não foi possível exibir o resultado. Elementos não encontrados.');
-            }
+                moviesGrid.innerHTML += movieCardHTML;
+            });
         } else {
-            alert('Nenhum filme encontrado para sua busca.');
+            moviesGrid.innerHTML = `<p class="error-message">Nenhum filme encontrado para sua busca. Tente ser mais descritivo!</p>`;
         }
     } catch (error) {
         console.error('Erro ao fazer a requisição:', error);
-        alert('Erro ao buscar filmes. Tente novamente.');
+        // 3. Exibir mensagem de erro na tela
+        moviesGrid.innerHTML = `<p class="error-message">Ops! Algo deu errado ao buscar os filmes. Verifique sua conexão e tente novamente.</p>`;
     } finally {
-        // Reset button
-        searchButton.innerHTML = originalText;
+        // 4. Restaurar o botão ao estado original
+        searchButton.innerHTML = originalButtonText;
         updateSearchButton();
     }
 }
 
-// Add typing effect to placeholder (optional enhancement)
-// function addTypingEffect() {
-//     const placeholders = [
-//         "Digite como você está se sentindo...",
-//         "Que tipo de filme você quer assistir?",
-//         "Descreva seu humor atual...",
-//         "O que combina com seu dia hoje?"
-//     ];
+// Efeito de digitação para o placeholder
+function addTypingEffect() {
+    const placeholders = [
+        "Descreva como você está se sentindo...",
+        "Que tipo de filme você quer assistir?",
+        "Procurando algo para uma noite de sexta?",
+        "O que combina com seu dia hoje?"
+    ];
 
-//     let currentIndex = 0;
+    let currentIndex = 0;
+    const typingSpeed = 100; // ms
+    const erasingSpeed = 50; // ms
+    const delayBetween = 2000; // ms
 
-//     setInterval(() => {
-//         if (!moodInput.value) {
-//             moodInput.placeholder = placeholders[currentIndex];
-//             currentIndex = (currentIndex + 1) % placeholders.length;
-//         }
-//     }, 3000);
-// }
+    let charIndex = 0;
+    let isDeleting = false;
 
-// Initialize typing effect
-//addTypingEffect();
+    function type() {
+        const currentPlaceholder = placeholders[currentIndex];
+        
+        if (moodInput.value) return; // Pausa se o usuário estiver digitando
+
+        if (isDeleting) {
+            moodInput.placeholder = currentPlaceholder.substring(0, charIndex - 1);
+            charIndex--;
+        } else {
+            moodInput.placeholder = currentPlaceholder.substring(0, charIndex + 1);
+            charIndex++;
+        }
+
+        if (!isDeleting && charIndex === currentPlaceholder.length) {
+            isDeleting = true;
+            setTimeout(type, delayBetween);
+        } else if (isDeleting && charIndex === 0) {
+            isDeleting = false;
+            currentIndex = (currentIndex + 1) % placeholders.length;
+            setTimeout(type, 500);
+        } else {
+            setTimeout(type, isDeleting ? erasingSpeed : typingSpeed);
+        }
+    }
+    
+    setTimeout(type, 500);
+}

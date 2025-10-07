@@ -4,7 +4,7 @@
     right: -50%;
     top: 0;
     bottom: 0;
-    background-image: linear-gradient(-60deg, #510101 50%, #181717 50%);
+    background-image: linear-gradient(-60deg, #2b89cc 50%, #2f3571 50%);
     position: fixed;
     z-index: -1;
     opacity: .7;
